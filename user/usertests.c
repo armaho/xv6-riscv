@@ -2586,6 +2586,26 @@ badarg(char *s)
   exit(0);
 }
 
+// test for the amount of free memory
+void 
+memfreetest() {
+  int mf1 = memfree();
+  printf("free memory before allocation: %d\n", mf1);
+
+  malloc(PGSIZE);
+
+  int mf2 = memfree();
+  printf("free memory after allocation: %d\n", mf2);
+
+  printf("memory diff: %d\n", mf1 - mf2);
+
+  if (mf2 >= mf1) {
+    exit(1);
+  }
+
+  exit(0);
+}
+
 struct test {
   void (*f)(char *);
   char *s;
@@ -2650,6 +2670,7 @@ struct test {
   {sbrklast, "sbrklast"},
   {sbrk8000, "sbrk8000"},
   {badarg, "badarg" },
+  {memfreetest, "memfreetest"},
 
   { 0, 0},
 };
