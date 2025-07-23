@@ -351,11 +351,17 @@ typedef uint64 *pagetable_t; // 512 PTEs
 
 #endif // __ASSEMBLER__
 
-#define PGSIZE 4096 // bytes per page
-#define PGSHIFT 12  // bits of offset within a page
+#define MPGCNT 4
+
+#define PGSIZE 4096             // bytes per page
+#define PGSHIFT 12              // bits of offset within a page
+#define MPGSHIFT 21             // bits of offsett within a megapage
+#define MPGSIZE (1 << MPGSHIFT) // bytes per megapage
 
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
+#define MPGROUNDUP(sz)  (((sz)+MPGSIZE-1) & ~(MPGSIZE-1))
+#define MPGROUNDDOWN(a) (((a)) & ~(MPGSIZE-1))
 
 #define PTE_V (1L << 0) // valid
 #define PTE_R (1L << 1)
@@ -374,6 +380,9 @@ typedef uint64 *pagetable_t; // 512 PTEs
 #define PXMASK          0x1FF // 9 bits
 #define PXSHIFT(level)  (PGSHIFT+(9*(level)))
 #define PX(level, va) ((((uint64) (va)) >> PXSHIFT(level)) & PXMASK)
+
+#define IS_VALID_PTE(pte) ((pte) & PTE_V)
+#define IS_LEAF_PTE(pte) ((pte) & (PTE_R | PTE_W | PTE_X))
 
 // one beyond the highest possible virtual address.
 // MAXVA is actually one bit less than the max allowed by

@@ -2016,9 +2016,13 @@ sbrkbasic(char *s)
       exit(0);
     }
     
+    printf("not killed\n");
+
     for(b = a; b < a+TOOMUCH; b += 4096){
       *b = 99;
     }
+
+    printf("not killed\n");
     
     // we should not get here! either sbrk(TOOMUCH)
     // should have failed, or (with lazy allocation)
