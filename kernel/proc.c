@@ -274,6 +274,17 @@ growproc(int n)
   return 0;
 }
 
+// Grow user memory by n byte, without page allocation.
+// Returns the virtual address of memory in user process.
+uint64 growproclazy(int n) {
+  struct proc *p = myproc();
+
+  uint64 mem = PGROUNDUP(p->sz);
+  p->sz = PGROUNDUP(p->sz + n);
+
+  return mem;
+}
+
 // Create a new process, copying the parent.
 // Sets up child kernel stack to return as if from fork() system call.
 int
@@ -307,6 +318,14 @@ fork(void)
     if(p->ofile[i])
       np->ofile[i] = filedup(p->ofile[i]);
   np->cwd = idup(p->cwd);
+
+  // copy mapped memory
+  for (i = 0; i < NMAPPEDMEM; i++) {
+    np->mappedMem[i] = p->mappedMem[i];
+    if (p->mappedMem[i].addr != 0) {
+      filedup(p->mappedMem[i].file);
+    }
+  }
 
   safestrcpy(np->name, p->name, sizeof(p->name));
 
@@ -357,6 +376,14 @@ exit(int status)
       struct file *f = p->ofile[fd];
       fileclose(f);
       p->ofile[fd] = 0;
+    }
+  }
+
+  // Close mapped files.
+  for (int i = 0; i < NMAPPEDMEM; i++) {
+    MappedMem *mm = &p->mappedMem[i];
+    if (mm->addr != 0) {
+      munmap(mm->addr, mm->len);
     }
   }
 
